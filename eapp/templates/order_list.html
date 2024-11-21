@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid" style="padding: 50px; background-color: #f5f5f5; margin-top: 100px;">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header" style="background-color: #0f0f0e;">
+          <h3 class="text-center font-weight-light my-4" style="color: rgb(245, 239, 239);">Orders</h3>
+        </div>
+        <div class="card-body">
+          {% for order in orders %}
+          <a href="{% url 'order_detail' order.id %}">
+          <div class="card mb-3" style="background-color: #ffffff; border: 1px solid #ced4da;">
+            <div class="card-header" style="background-color: #ffffff; color: rgb(243, 235, 235);">
+              <h5 class="mb-0">Order ID: {{ order.id }}</h5>
+            </div>
+            <div class="card-body">
+              <p class="card-text">Order Date: {{ order.order_date }}</p>
+              <p class="card-text">Order Status: {{ order.status }}</p>
+              <p class="card-text">Order Address: {{ order.address }}</p>
+            </div>
+          </div>
+        </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleOrderItems(orderId) {
+    var orderItems = document.getElementById('orderItems' + orderId);
+    if (orderItems.style.display === 'none') {
+      orderItems.style.display = 'block';
+    } else {
+      orderItems.style.display = 'none';
+    }
+  }
+</script>
+
+{% endblock %}

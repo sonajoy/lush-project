@@ -1,0 +1,105 @@
+{% extends 'base.html' %} {% block content %} {% load static %}
+
+<style>
+.containerr {
+  width: 80%;
+  margin: 90px auto;
+}
+.address {
+  background-color: #f8f8f8;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.product {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.product img {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+}
+.status {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.status div {
+  width: 24%;
+  text-align: center;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.status div.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.step {
+  text-align: center;
+}
+
+.step p {
+  margin:0;
+}
+
+.step span {
+  display:block;
+}
+
+.progress-bar:before {
+  content:'';
+  position:absolute;
+  top:15px; /* Adjust according to your design */
+  left:0; 
+  height:5px; /* Adjust according to your design */
+  width:100%; /* Replace with dynamic width based on order status */
+  background-color:green; /* Adjust according to your design */
+  z-index:-1; 
+}
+
+.completed p{
+  color:green; /* Adjust according to your design */
+}
+</style>
+
+<div class="containerr">
+  <div class="address">
+    <h2>Delivery Address</h2>
+    <p>Recepient Name: {{ order.customer }}</p>
+    <p>Address: {{ order.address }}</p>
+    <p>Phone number: {{ order.address.recepient_contact }}</p>
+  </div>
+  {% for item in order.orderitem_set.all %}
+  <div class="product">
+    <img src="{{ item.product.image_1.url }}" alt="Product Image">
+    <div>
+      <h3>{{ item.product.name }}</h3>
+      <p>Qty: {{ item.quantity }} item</p>
+      <p>Price: {{ item.total_price }}</p>
+    </div>
+  </div>
+  {% endfor %}
+
+  
+  <div class="progress-bar" role="progressbar" style="width: {% if order.status == 'Pending' %} 10% {% elif order.status == 'Processing' %} 33% {% elif order.status == 'Shipped/Dispatched' %} 66% {% else %} 100% {% endif %}" aria-valuenow="{% if order.status == 'Shipped/Dispatched' %} 33 {% elif order.status == 'Delivered' %} 66 {% else %} 100 {% endif %}" aria-valuemin="0" aria-valuemax="100">
+    <!-- Your steps go here -->
+  </div>
+  <div class="d-flex justify-content-between mt-3">
+    <div class="text-muted">Pending</div>
+    <div class="text-muted">Placed</div>
+    <div class="text-muted">Shipped</div>
+    <div class="text-muted">Delivered</div>
+  </div>
+
+  <!-- Add more products as needed -->
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<div class="hero-wrap hero-bread" style="background-image: url('../static/images/bg_6.jpg');">
+    <div class="container">
+      <div class="row no-gutters slider-text align-items-center justify-content-center">
+        <div class="col-md-9 ftco-animate text-center">
+            
+          <h1 class="mb-0 bread">Checkout</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+        <!-- checkout-area start -->
+        <section class="checkout-area pb-70">
+            <div class="container" style="padding: 30px; margin-top: 150px; background-color: white;">
+                <form method="post" id="checkout-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="address_id" id="address-id">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="checkbox-form">
+                                <h3 style="color: black;">Billing Details</h3>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h3 style="color: black;">Shipping Address</h3>
+                                        {% for address in addresses %}
+                                          <div class="card" style="margin-top: 10px;">
+                                            <div class="card-body">
+                                              <p class="card-text" style="color: black;">{{ address }}</p>
+                                              <a href="{% url 'address_edit' address.id %}" class="card-link" style="color: black;">Edit Address</a>
+                                              <button type="button" data-address-id="{{ address.id }}" class="btn theme-btn select-btn" style="margin-left: 20px;">Select</button>
+
+                                            </div>
+                                          </div>
+                                        {% endfor %}
+                                        
+                                        <button type="button" data-url="{% url 'address_create' %}" class="btn theme-btn add-btn" style="margin-top: 20px;">Add Address</button>
+
+                                        
+                                      </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="" style="margin-left: 100px;">
+                            <div class="your-order mb-30" style="margin-bottom: 30px;">
+                                <h3 style="color: black;">Your order</h3>
+                                <div class="your-order-table table-responsive">
+                                    <table style="color: black;">
+                                        <thead>
+                                            <tr>
+                                                <th class="product-name">Product</th>
+                                                <th class="product-total">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in cart_items %}
+                                            <tr class="cart_item">
+                                                <td class="product-name">
+                                                    {{ item.product.name }} <strong class="product-quantity"> × {{ item.quantity }}</strong>
+                                                </td>
+                                                <td class="product-total">
+                                                    <span class="amount">{{ item.sub_total }}</span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="order-total">
+                                                <th>Order Total</th>
+                                                <td><strong><span class="amount">${{ total_price }}</span></strong>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="order-button-payment mt-20">
+                                <button type="submit" value="Place Order" class="btn theme-btn" style="background-color: black; color: white;">Place order</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+        <!-- checkout-area end -->
+        <script>
+           document.querySelectorAll('.select-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const addressId = this.getAttribute('data-address-id');
+                    selectAddress(addressId);
+               });
+           });
+ 
+            document.querySelector('.add-btn').addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            window.location.href = url;
+             });
+        </script>
+{% endblock %}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Purchase Order</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .purchase-order-item {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        #purchase-order-items {
+            margin-top: 20px;
+        }
+        .purchase-order-item button {
+            background-color: #dc3545;
+            margin-top: 10px;
+        }
+        .purchase-order-item button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Purchase Order</h1>
+    <form method="get" id="seller-form">
+        <label for="seller">Select Seller:</label>
+        <select name="seller" id="seller" onchange="document.getElementById('seller-form').submit();">
+            <option value="">Select a seller</option>
+            {% for seller in sellers %}
+                <option value="{{ seller.id }}" {% if seller.id|stringformat:"s" == request.GET.seller %}selected{% endif %}>{{ seller.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <form method="post" id="purchase-order-form">
+        {% csrf_token %}
+        <input type="hidden" name="total_amount" id="total_amount">
+        
+        <input type="date" name="purchase_order_date" value="{{ date.today }}" hidden><br>
+        <select name="seller" id="seller" onchange="document.getElementById('seller-form').submit();" hidden>
+            <option value="">Select a seller</option>
+            {% for seller in sellers %}
+                <option value="{{ seller.id }}" {% if seller.id|stringformat:"s" == request.GET.seller %}selected{% endif %}>{{ seller.name }}</option>
+            {% endfor %}
+        </select>
+
+        <div id="purchase-order-items">
+            <h3>Purchase Order Items</h3>
+            <div class="purchase-order-item">
+                <label for="product">Select Product:</label>
+                <select name="product" class="product" onchange="updateUnitPrice(this)">
+                    <option value="">Select a product</option>
+                    {% for product in products %}
+                        <option value="{{ product.id }}" data-cost="{{ product.cost }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select><br>
+                
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" class="quantity" oninput="calculateItemTotal(this)" required><br>
+
+                <label for="purchase_unit_price">Unit Price:</label>
+                <input type="number" step="0.01" name="purchase_unit_price" class="purchase_unit_price" readonly><br>
+
+                <label for="item_total_amount">Total Amount:</label>
+                <input type="number" step="0.01" name="item_total_amount" class="item_total_amount" readonly><br>
+
+                <button type="button" onclick="addNewItem()">Add Another Item</button>
+            </div>
+        </div>
+
+        <label for="order_total_amount">Order Total Amount:</label>
+        <input type="number" step="0.01" id="order_total_amount" readonly><br>
+
+        <button type="submit" onclick="updateTotalAmount()">Create Purchase Order</button>
+    </form>
+
+    <script>
+        function addNewItem() {
+            var itemContainer = document.createElement('div');
+            itemContainer.className = 'purchase-order-item';
+            itemContainer.innerHTML = `
+                <label for="product">Select Product:</label>
+                <select name="product" class="product" onchange="updateUnitPrice(this)">
+                    <option value="">Select a product</option>
+                    {% for product in products %}
+                        <option value="{{ product.id }}" data-cost="{{ product.cost }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select><br>
+                
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" class="quantity" oninput="calculateItemTotal(this)" required><br>
+
+                <label for="purchase_unit_price">Unit Price:</label>
+                <input type="number" step="0.01" name="purchase_unit_price" class="purchase_unit_price" readonly><br>
+
+                <label for="item_total_amount">Total Amount:</label>
+                <input type="number" step="0.01" name="item_total_amount" class="item_total_amount" readonly><br>
+
+                <button type="button" onclick="removeItem(this)">Remove Item</button>
+            `;
+            document.getElementById('purchase-order-items').appendChild(itemContainer);
+        }
+
+        function removeItem(button) {
+            button.parentElement.remove();
+            updateOrderTotalAmount();
+        }
+
+        function updateUnitPrice(selectElement) {
+            var cost = selectElement.options[selectElement.selectedIndex].getAttribute('data-cost');
+            var unitPriceInput = selectElement.parentElement.querySelector('.purchase_unit_price');
+            unitPriceInput.value = cost;
+            calculateItemTotal(unitPriceInput);
+        }
+
+        function calculateItemTotal(element) {
+            var itemContainer = element.parentElement;
+            var quantity = itemContainer.querySelector('.quantity').value;
+            var unitPrice = itemContainer.querySelector('.purchase_unit_price').value;
+            var itemTotalAmount = itemContainer.querySelector('.item_total_amount');
+            if (quantity && unitPrice) {
+                itemTotalAmount.value = (quantity * unitPrice).toFixed(2);
+            } else {
+                itemTotalAmount.value = '';
+            }
+            updateOrderTotalAmount();
+        }
+
+        function updateOrderTotalAmount() {
+            var totalAmount = 0;
+            var itemTotalAmounts = document.querySelectorAll('.item_total_amount');
+            itemTotalAmounts.forEach(function(itemTotalAmount) {
+                if (itemTotalAmount.value) {
+                    totalAmount += parseFloat(itemTotalAmount.value);
+                }
+            });
+            document.getElementById('order_total_amount').value = totalAmount.toFixed(2);
+            document.getElementById('total_amount').value = totalAmount.toFixed(2);
+        }
+
+        function updateTotalAmount() {
+            updateOrderTotalAmount();
+        }
+    </script>
+</body>
+</html>

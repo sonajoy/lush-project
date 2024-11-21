@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+
+    <div class="hero-wrap hero-bread" style="background-image: url('../static/images/bg_6.jpg');">
+      <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+          <div class="col-md-9 ftco-animate text-center">
+          	
+            <h1 class="mb-0 bread">My Cart</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="ftco-section ftco-cart">
+			<div class="container">
+				<div class="row">
+    			<div class="col-md-12 ftco-animate">
+    				<div class="cart-list">
+	    				<table class="table">
+						    <thead class="thead-primary">
+						      <tr class="text-center">
+								<th>Images</th>
+								<th>Product</th>
+								<th>Unit Price</th>
+								<th>Quantity</th>
+								<th>Total</th>
+								<th>Remove</th>
+						      </tr>
+						    </thead>
+						    <tbody>
+								{% for item in cart_items %}
+						      <tr class="text-center">
+                                <td class="product-remove">
+                                    <button type="submit" formaction="{% url 'delete_item_in_cart' item.product.id %}" name="product_id" value="{{ item.product.id }}"><i class="ion-ios-close"></i></button>
+                                </td>
+						        <td class="image-prod"><div class="img" style="background-image: url('{{ item.product.image_1.url }}');"></div></td>
+						        
+						        <td class="product-name">
+						        	<h3>{{ item.product.name }}</h3>
+						        </td>
+						        
+						        <td class="price">${{ item.product.price }}</td>
+						        
+								<td class="product-quantity">
+									<div class="cart-quantity">
+										<a href="{% url 'decrease_quantity' item.id %}" class="quantity-button">-</a>
+										<input type="text" name="quantity" value="{{ item.quantity }}" class="quantity-input" readonly>
+										<a href="{% url 'increase_quantity' item.id %}" class="quantity-button">+</a>
+									</div>
+								</td> 
+						        
+						        <td class="total">₹{{ item.sub_total|floatformat:2 }}</td>
+						      </tr><!-- END TR-->
+							  {% endfor %}
+						    </tbody>
+						  </table>
+					  </div>
+    			</div>
+    		</div>
+    		<div class="row justify-content-start">
+    			<div class="col col-lg-5 col-md-6 mt-5 cart-wrap ftco-animate">
+    				<div class="cart-total mb-3">
+    					<h3>Cart Totals</h3>
+    					<p class="d-flex">
+    						<span>Subtotal</span>
+    						<span>${{ total_price }}</span>
+    					</p>
+    					<hr>
+    					<p class="d-flex total-price">
+    						<span>Total</span>
+    						<span>${{ total_price }}</span>
+    					</p>
+    				</div>
+					{% if cart_items %}
+    				<p class="text-center"><a class="btn btn-primary py-3 px-4" href="{% url 'checkouts' %}">Proceed to checkout</a></p>
+					
+                {% else %}
+                <p style="font-size: large; color: brown; font-weight: bold;">Your cart is empty. Please add items to proceed.</p>
+                {% endif %}
+    			</div>
+    		</div>
+			</div>
+		</section>
+		{% endblock %}		

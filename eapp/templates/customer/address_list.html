@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div style="margin: 100px auto; max-width: 800px;">
+    <h2 style="text-align: center;">Address List</h2>
+
+    <!-- Card for adding a new address -->
+    <div style="margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; padding: 20px;">
+        <h5 style="margin-bottom: 10px;">Add New Address</h5>
+        <p style="margin-bottom: 10px;">Click below to add a new address:</p>
+        <a href="{% url 'address_create' %}" style="padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border: none; border-radius: 5px;">Add Address</a>
+    </div>
+    {% if request.user.customer.address_set.all %}
+    <!-- Cards for displaying existing addresses -->
+    {% for address in request.user.customer.address_set.all %}
+    <div style="margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; padding: 20px;">
+        <h5 style="margin-bottom: 10px;">{{ address.recepient_name }}</h5>
+        <p style="margin-bottom: 5px;">Contact: {{ address.recepient_contact }}</p>
+        <p style="margin-bottom: 5px;">{{ address.address_line1 }}</p>
+        <p style="margin-bottom: 5px;">{{ address.city }}, {{ address.state }} - {{ address.postal_code }}</p>
+        <a href="{% url 'address_edit' address.id %}" style="padding: 5px 10px; background-color: #17a2b8; color: #fff; text-decoration: none; border: none; border-radius: 5px; margin-right: 10px;">Edit</a>
+        <a href="{% url 'address_delete' address.id %}" style="padding: 5px 10px; background-color: #dc3545; color: #fff; text-decoration: none; border: none; border-radius: 5px;">Delete</a>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No addresses found.</p>
+    {% endif %}
+</div>
+
+
+{% endblock %}
